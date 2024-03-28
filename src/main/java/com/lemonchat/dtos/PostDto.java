@@ -9,13 +9,9 @@ import lombok.Setter;
 
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-public class PostDto {
-    private Long postId;
-    
-    private String title;
-    private String topic;
-    private String content;
-    
-    private PostDto parentPost;
-    private Set<PostDto> replies;
+public class PostDto extends BasePostDto{
+	
+    private Long inReplyTo;
+	
+	private Set<BasePostDto> replies;
 }

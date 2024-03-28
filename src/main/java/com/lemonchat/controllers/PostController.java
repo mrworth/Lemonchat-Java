@@ -14,11 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lemonchat.dtos.ExtraFields;
+import com.lemonchat.dtos.BasePostDto;
 import com.lemonchat.dtos.PostDto;
 import com.lemonchat.services.PostService;
 import com.lemonchat.services.impl.PostServiceImpl;
-import com.lemonchat.util.CompositeDto;
 
 @RestController
 @RequestMapping("/posts")
@@ -27,7 +26,13 @@ public class PostController {
     @Autowired
     private PostService postService;
     
-    private static final Logger logger = LoggerFactory.getLogger(PostServiceImpl.class);
+    @SuppressWarnings("unused")
+	private static final Logger logger = LoggerFactory.getLogger(PostServiceImpl.class);
+    
+    @GetMapping("/basepost/{postId}")
+    public BasePostDto getBasePostById(@PathVariable Long postId) {
+        return postService.findBasePostById(postId);
+    }
     
     @GetMapping("/{postId}")
     public PostDto getPostById(@PathVariable Long postId) {
@@ -45,17 +50,10 @@ public class PostController {
 //        return postService.findRandomRepliesByPostId(postId);
 //    }
     
+    
     @PostMapping
-    public ResponseEntity<PostDto> createPost(@RequestBody CompositeDto<PostDto, ExtraFields> requestDto) {
-        PostDto postDto = requestDto.getData();
-        ExtraFields metadata = requestDto.getMetadata();
-        Long inReplyTo = null;
-        if(metadata != null) {
-        	inReplyTo = metadata.getInReplyTo();
-        }
-    	logger.info("request field:"+inReplyTo);
-        logger.info(postDto.toString());
-    	PostDto createdPost = postService.createPost(postDto, inReplyTo);
+    public ResponseEntity<PostDto> createPostWithReplies(@RequestBody PostDto requestDto) {
+    	PostDto createdPost = postService.createPost(requestDto);
         return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }
 
