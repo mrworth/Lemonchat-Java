@@ -52,7 +52,7 @@ public class PostController {
     
     
     @PostMapping
-    public ResponseEntity<PostDto> createPostWithReplies(@RequestBody PostDto requestDto) {
+    public ResponseEntity<PostDto> createPost(@RequestBody PostDto requestDto) {
     	PostDto createdPost = postService.createPost(requestDto);
         return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }

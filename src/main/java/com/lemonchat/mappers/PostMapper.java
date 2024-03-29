@@ -14,12 +14,14 @@ public interface PostMapper {
     PostMapper INSTANCE = Mappers.getMapper(PostMapper.class);
 
     @Mapping(target = "parentPost", ignore = true)
+    @Mapping(target="username", source="account.username")
     BasePostDto postToPostDto(BasePost post);
 
     BasePost postDtoToPost(BasePostDto postDto);
     
     PostDto postToPostDto(Post post);
-
+    
+    @Mapping(target="username", source="account.username")
     Post postDtoToPost(PostDto postDto);
 
 }

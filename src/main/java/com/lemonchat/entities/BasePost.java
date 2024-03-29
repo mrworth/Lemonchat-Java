@@ -12,6 +12,8 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,9 +35,18 @@ public class BasePost {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long postId;
-
+    
     private String title;
+    
+    @NotNull
     private String topic;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="account_id")
+    private Account account;
+    
+	@Transient
+    private String username;
 
     @Column(length = 10000)
     private String content;
@@ -46,5 +57,9 @@ public class BasePost {
     
     public Long getParentPostId() {
         return parentPost != null ? parentPost.getPostId() : null;
+    }
+    
+    public String getUsername() {
+        return this.account != null ? this.account.getUsername() : null;
     }
 }

@@ -7,11 +7,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.lemonchat.dtos.AccountDto;
 import com.lemonchat.dtos.BasePostDto;
 import com.lemonchat.dtos.PostDto;
+import com.lemonchat.entities.Account;
 import com.lemonchat.entities.BasePost;
 import com.lemonchat.entities.Post;
+import com.lemonchat.mappers.AccountMapper;
 import com.lemonchat.mappers.PostMapper;
+import com.lemonchat.repositories.AccountRepository;
 import com.lemonchat.repositories.BasePostRepository;
 import com.lemonchat.repositories.PostRepository;
 import com.lemonchat.services.PostService;
@@ -19,6 +23,9 @@ import com.lemonchat.services.PostService;
 @Service
 public class PostServiceImpl implements PostService {
 
+    @Autowired
+    private AccountRepository accountRepository;
+    
     @Autowired
     private BasePostRepository basePostRepository;
     
@@ -53,6 +60,10 @@ public class PostServiceImpl implements PostService {
 	public PostDto createPost(PostDto postDto) {
 		Post post = PostMapper.INSTANCE.postDtoToPost(postDto);
 		Long inReplyTo = postDto.getInReplyTo();
+		String username = postDto.getUsername();
+		Account account = accountRepository.findByUsername(username).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found with username " + username));
+		post.setAccount(account);
+		//inReplyTo is valid as null (this is a topic)
 		if(inReplyTo!=null) {
 			BasePost parentPost = basePostRepository.findById(inReplyTo)
 					.orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "Parent post not found with id " + inReplyTo));

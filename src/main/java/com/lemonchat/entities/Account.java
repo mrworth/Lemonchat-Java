@@ -18,9 +18,9 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long accountId;
-    @NotNull(message = "Name is required")
+    @NotNull(message = "Username is required")
     @Column(unique = true)
-    private String name;
+    private String username;
     @NotNull(message = "Email is required")
     @Column(unique = true)
     private String email;
