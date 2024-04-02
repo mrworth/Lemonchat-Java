@@ -13,7 +13,7 @@ public class AccountDto {
 	private Long accountId;
     @NotBlank(message = "Username field is required.")
 	private String username;
-	@Email(message = "Email field should be valid.")
+	@Email(message = "Email field formatting invalid.")
     @NotBlank(message = "Email field is required.")
 	private String email;
 }

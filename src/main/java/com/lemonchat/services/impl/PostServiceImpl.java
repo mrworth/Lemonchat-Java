@@ -7,13 +7,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.lemonchat.dtos.AccountDto;
 import com.lemonchat.dtos.BasePostDto;
 import com.lemonchat.dtos.PostDto;
 import com.lemonchat.entities.Account;
 import com.lemonchat.entities.BasePost;
 import com.lemonchat.entities.Post;
-import com.lemonchat.mappers.AccountMapper;
 import com.lemonchat.mappers.PostMapper;
 import com.lemonchat.repositories.AccountRepository;
 import com.lemonchat.repositories.BasePostRepository;
@@ -23,6 +21,9 @@ import com.lemonchat.services.PostService;
 @Service
 public class PostServiceImpl implements PostService {
 
+	@Autowired
+    private PostMapper postMapper;
+	
     @Autowired
     private AccountRepository accountRepository;
     
@@ -38,14 +39,14 @@ public class PostServiceImpl implements PostService {
 //    @Override
 //    public List<PostDto> findPostsByAccountName(String accountName) {
 //        return postRepository.findByAccount_Name(accountName).stream()
-//                .map(PostMapper.INSTANCE::postToPostDto)
+//                .map(postMapper::postToPostDto)
 //                .collect(Collectors.toList());
 //    }
 //
 //    @Override
 //    public List<PostDto> findRandomRepliesByPostId(Long postId) {
 //        return postRepository.findRandomRepliesByPostId(postId).stream()
-//                .map(PostMapper.INSTANCE::postToPostDto)
+//                .map(postMapper::postToPostDto)
 //                .collect(Collectors.toList());
 //    }
 
@@ -53,12 +54,12 @@ public class PostServiceImpl implements PostService {
 	public BasePostDto findBasePostById(Long postId) {
 		BasePost existingPost =  basePostRepository.findById(postId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found with id " + postId));
-		return PostMapper.INSTANCE.postToPostDto(existingPost);
+		return postMapper.postToPostDto(existingPost);
 	}
 
 	@Override
 	public PostDto createPost(PostDto postDto) {
-		Post post = PostMapper.INSTANCE.postDtoToPost(postDto);
+		Post post = postMapper.postDtoToPost(postDto);
 		Long inReplyTo = postDto.getInReplyTo();
 		String username = postDto.getUsername();
 		Account account = accountRepository.findByUsername(username).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found with username " + username));
@@ -70,7 +71,7 @@ public class PostServiceImpl implements PostService {
 			post.setParentPost(parentPost);
 			post.setTopic(parentPost.getTopic());
 		}
-		return PostMapper.INSTANCE.postToPostDto(postRepository.save(post));
+		return postMapper.postToPostDto(postRepository.save(post));
 	}
 
 	@Override
@@ -78,7 +79,8 @@ public class PostServiceImpl implements PostService {
 	    Post existingPost = postRepository.findById(postDto.getPostId())
 	            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found with id " + postDto.getPostId()));
 	    existingPost.setContent(postDto.getContent());
-	    return PostMapper.INSTANCE.postToPostDto(postRepository.saveAndFlush(existingPost));
+	    existingPost.setTitle(postDto.getTitle());
+	    return postMapper.postToPostDto(postRepository.saveAndFlush(existingPost));
 	}
 
 	@Override
@@ -90,7 +92,7 @@ public class PostServiceImpl implements PostService {
 	public PostDto findPostById(Long postId) {
 		Post existingPost =  postRepository.findById(postId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found with id " + postId));
-		return PostMapper.INSTANCE.postToPostDto(existingPost);
+		return postMapper.postToPostDto(existingPost);
 	}
 
 }

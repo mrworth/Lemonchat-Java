@@ -5,6 +5,8 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.4'
 }
 
+
+
 group = 'com.lemonchat'
 version = '0.0.1-SNAPSHOT'
 
@@ -16,6 +18,12 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+}
+
+def generatedSourcesDir = "${buildDir}/generated/sources/annotationProcessor/java/main"
+
+tasks.withType(JavaCompile) {
+    options.annotationProcessorGeneratedSourcesDirectory = file(generatedSourcesDir)
 }
 
 repositories {
@@ -31,13 +39,15 @@ dependencies {
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'org.postgresql:postgresql'
+	testImplementation 'com.h2database:h2:2.2.224'
 	implementation 'org.mapstruct:mapstruct:1.4.2.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
+    
 }
 sourceSets {
     main {
         java {
-            srcDirs = ['src/main/java']
+            srcDirs = ['src/main/java', generatedSourcesDir]
         }
         resources {
             srcDirs = ['src/main/resources']

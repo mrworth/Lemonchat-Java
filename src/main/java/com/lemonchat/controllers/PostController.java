@@ -19,6 +19,8 @@ import com.lemonchat.dtos.PostDto;
 import com.lemonchat.services.PostService;
 import com.lemonchat.services.impl.PostServiceImpl;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/posts")
 public class PostController {
@@ -30,42 +32,29 @@ public class PostController {
 	private static final Logger logger = LoggerFactory.getLogger(PostServiceImpl.class);
     
     @GetMapping("/basepost/{postId}")
-    public BasePostDto getBasePostById(@PathVariable Long postId) {
+    public BasePostDto getBasePostById(@PathVariable("postId") Long postId) {
         return postService.findBasePostById(postId);
     }
     
     @GetMapping("/{postId}")
-    public PostDto getPostById(@PathVariable Long postId) {
+    public PostDto getPostById(@PathVariable("postId") Long postId) {
         return postService.findPostById(postId);
     }
-
-
-//    @GetMapping("/by-account/{accountName}")
-//    public List<PostDto> getPostsByAccountName(@PathVariable String accountName) {
-//        return postService.findPostsByAccountName(accountName);
-//    }
-//
-//    @GetMapping("/{postId}/random-replies")
-//    public List<PostDto> getRandomRepliesByPostId(@PathVariable Long postId) {
-//        return postService.findRandomRepliesByPostId(postId);
-//    }
-    
     
     @PostMapping
-    public ResponseEntity<PostDto> createPost(@RequestBody PostDto requestDto) {
+    public ResponseEntity<PostDto> createPost(@RequestBody @Valid PostDto requestDto) {
     	PostDto createdPost = postService.createPost(requestDto);
         return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{postId}")
-    public ResponseEntity<PostDto> updatePost(@PathVariable Long postId, @RequestBody PostDto postDto) {
-    	postDto.setPostId(postId); 
+    @PutMapping
+    public ResponseEntity<PostDto> updatePost(@RequestBody PostDto postDto) {
         PostDto updatedPost = postService.updatePost(postDto);
         return ResponseEntity.ok(updatedPost);
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
+    public ResponseEntity<Void> deletePost(@PathVariable("postId") Long postId) {
         postService.deletePost(postId);
         return ResponseEntity.noContent().build();
     }

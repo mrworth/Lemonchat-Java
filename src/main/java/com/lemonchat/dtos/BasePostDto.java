@@ -1,7 +1,6 @@
 package com.lemonchat.dtos;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.lemonchat.entities.Account;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -18,7 +17,9 @@ public class BasePostDto {
     
     @NotNull
     private String title;
+    @NotNull
     private String topic;
+    @NotNull
     private String content;
     
     @JsonIgnore
