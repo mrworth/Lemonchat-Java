@@ -36,20 +36,6 @@ public class PostServiceImpl implements PostService {
     @SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(PostServiceImpl.class);
 
-//    @Override
-//    public List<PostDto> findPostsByAccountName(String accountName) {
-//        return postRepository.findByAccount_Name(accountName).stream()
-//                .map(postMapper::postToPostDto)
-//                .collect(Collectors.toList());
-//    }
-//
-//    @Override
-//    public List<PostDto> findRandomRepliesByPostId(Long postId) {
-//        return postRepository.findRandomRepliesByPostId(postId).stream()
-//                .map(postMapper::postToPostDto)
-//                .collect(Collectors.toList());
-//    }
-
 	@Override
 	public BasePostDto findBasePostById(Long postId) {
 		BasePost existingPost =  basePostRepository.findById(postId)
