@@ -76,7 +76,7 @@ public class PostServiceTest {
 		Post post = new Post();
 		PostDto postDto = setupCreatePost(post,"testusername","testusername");
         postService.createPost(postDto);
-        then(postRepository).should(times(1)).save(post);
+        then(postRepository).should(times(1)).saveAndFlush(post);
 	}
 	
 	@Test
@@ -98,7 +98,7 @@ public class PostServiceTest {
 		given(basePostRepository.findById(1L)).willReturn(Optional.of(basePostMock));
 		
 		postService.createPost(postDto);
-		then(postRepository).should(times(1)).save(post);
+		then(postRepository).should(times(1)).saveAndFlush(post);
 		then(basePostMock).should(times(1)).getTopic();
 	}
 	

@@ -41,7 +41,7 @@ public class BasePost {
     @NotNull
     private String topic;
     
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="account_id")
     private Account account;
     

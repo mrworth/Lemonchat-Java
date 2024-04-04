@@ -57,7 +57,7 @@ public class PostServiceImpl implements PostService {
 			post.setParentPost(parentPost);
 			post.setTopic(parentPost.getTopic());
 		}
-		return postMapper.postToPostDto(postRepository.save(post));
+		return postMapper.postToPostDto(postRepository.saveAndFlush(post));
 	}
 
 	@Override
