@@ -18,6 +18,8 @@ import com.lemonchat.repositories.BasePostRepository;
 import com.lemonchat.repositories.PostRepository;
 import com.lemonchat.services.PostService;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class PostServiceImpl implements PostService {
 
@@ -44,20 +46,29 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
+	@Transactional
 	public PostDto createPost(PostDto postDto) {
 		Post post = postMapper.postDtoToPost(postDto);
+		post.setHasReplies(false);
 		Long inReplyTo = postDto.getInReplyTo();
 		String username = postDto.getUsername();
 		Account account = accountRepository.findByUsername(username).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found with username " + username));
 		post.setAccount(account);
+		BasePost parentBasePost = null;
 		//inReplyTo is valid as null (this is a topic)
 		if(inReplyTo!=null) {
-			BasePost parentPost = basePostRepository.findById(inReplyTo)
+			parentBasePost = basePostRepository.findById(inReplyTo)
 					.orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "Parent post not found with id " + inReplyTo));
-			post.setParentPost(parentPost);
-			post.setTopic(parentPost.getTopic());
+			post.setParentPost(parentBasePost);
+			post.setTopic(parentBasePost.getTopic());
 		}
-		return postMapper.postToPostDto(postRepository.saveAndFlush(post));
+		PostDto returnPost = postMapper.postToPostDto(postRepository.save(post));
+		if(parentBasePost!=null && !parentBasePost.getHasReplies()) {
+			Post parentPost = postRepository.findById(inReplyTo).get();
+			parentPost.setHasReplies(true);
+			postRepository.save(parentPost);
+		}
+		return returnPost;
 	}
 
 	@Override
@@ -70,7 +81,17 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
+	@Transactional
 	public void deletePost(Long postId) {
+		Post post = postRepository.findById(postId).get();
+		Long inReplyTo = post.getInReplyTo();
+		if(inReplyTo!=null) {			
+			Post parentPost = postRepository.findById(inReplyTo).get();
+			if(parentPost.getReplies().size()==1) {				
+				parentPost.setHasReplies(false);
+				postRepository.save(parentPost);
+			}
+		}
 		postRepository.deleteById(postId);
 	}
 

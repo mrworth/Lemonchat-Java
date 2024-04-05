@@ -15,6 +15,8 @@ import lombok.ToString;
 public class BasePostDto {
     private Long postId;
     
+    private Boolean hasReplies;
+    
     @NotNull
     private String title;
     @NotNull

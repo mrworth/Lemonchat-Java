@@ -55,6 +55,9 @@ public class BasePost {
     @JoinColumn(name = "parent_post_id")
     private BasePost parentPost;
     
+    @Column
+    private Boolean hasReplies;
+    
     public Long getParentPostId() {
         return parentPost != null ? parentPost.getPostId() : null;
     }

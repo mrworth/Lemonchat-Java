@@ -1,10 +1,14 @@
 package com.lemonchat.services;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -41,7 +45,7 @@ public class PostServiceTest {
     private PostMapper postMapper;
 	
 	@Mock
-    private BasePost basePostMock;
+    private BasePost basePostMock = mock(BasePost.class);
 	
 	@InjectMocks
 	PostServiceImpl postService = new PostServiceImpl();
@@ -76,7 +80,7 @@ public class PostServiceTest {
 		Post post = new Post();
 		PostDto postDto = setupCreatePost(post,"testusername","testusername");
         postService.createPost(postDto);
-        then(postRepository).should(times(1)).saveAndFlush(post);
+        then(postRepository).should(times(1)).save(post);
 	}
 	
 	@Test
@@ -94,11 +98,14 @@ public class PostServiceTest {
 		post.setInReplyTo(1L);
 		PostDto postDto = setupCreatePost(post,"testusername","testusername");
 		postDto.setInReplyTo(1L);
+		Post parentPostMock = mock(Post.class);
+		parentPostMock.setHasReplies(false);
 		
 		given(basePostRepository.findById(1L)).willReturn(Optional.of(basePostMock));
+		given(postRepository.findById(1L)).willReturn(Optional.of(parentPostMock));
 		
 		postService.createPost(postDto);
-		then(postRepository).should(times(1)).saveAndFlush(post);
+		then(postRepository).should(times(2)).save(any(Post.class));
 		then(basePostMock).should(times(1)).getTopic();
 	}
 	
@@ -151,7 +158,19 @@ public class PostServiceTest {
 	
 	@Test
 	public void testDeletePost() {
-		postService.deletePost(1L);
-		then(postRepository).should(times(1)).deleteById(1L);
+		Post post = new Post();
+		post.setInReplyTo(1L);
+		BasePost basePost = mock(BasePost.class);
+		List<BasePost> postReplies = new ArrayList<BasePost>();
+		postReplies.add(basePost);
+		Post parentPost = new Post();
+		parentPost.setPostId(1L);
+		parentPost.setReplies(postReplies);
+		post.setParentPost(parentPost);
+		given(postRepository.findById(2L)).willReturn(Optional.of(post));
+		given(postRepository.findById(1L)).willReturn(Optional.of(parentPost));
+		postService.deletePost(2L);
+		then(postRepository).should(times(1)).save(any(Post.class));
+		then(postRepository).should(times(1)).deleteById(2L);
 	} 
 }
