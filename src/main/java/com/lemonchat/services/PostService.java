@@ -8,6 +8,7 @@ public interface PostService {
 //    List<PostDto> findRandomRepliesByPostId(Long postId);
 	BasePostDto findBasePostById(Long postId);
 	
+	PostDto findPostByBasePost(BasePostDto basePostDto);
 	PostDto createPost(PostDto postDto);
 	PostDto updatePost(PostDto postDto);
 	void deletePost(Long postId);

@@ -1,5 +1,6 @@
 package com.lemonchat.dtos;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
@@ -13,9 +14,24 @@ import lombok.ToString;
 @ToString(callSuper=true)
 public class PostDto extends BasePostDto{
 	
-    private Long inReplyTo;
+    
 	
 	private Set<BasePostDto> replies;
+	
+	public PostDto(BasePostDto basePostDto, Long inReplyTo) {
+		if(basePostDto.getHasReplies()) {
+			throw new IllegalArgumentException("BasePost has replies in database, constructor is invalid.");
+		}
+		this.setPostId(basePostDto.getPostId());
+		this.setPostDetails(
+				basePostDto.getInReplyTo(), 
+				basePostDto.getTitle(), 
+				basePostDto.getTopic(),
+				basePostDto.getContent(),
+				basePostDto.getUsername()
+		);
+		this.setHasReplies(false);
+	}
 	
 	public void setPostDetails(Long inReplyTo,String title, String topic, String content, String username) {
 		this.setInReplyTo(inReplyTo);

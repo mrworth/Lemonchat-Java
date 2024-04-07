@@ -36,6 +36,9 @@ public class BasePost {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long postId;
     
+    @Transient
+    private Long inReplyTo;
+    
     private String title;
     
     @NotNull

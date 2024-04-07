@@ -19,9 +19,6 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 public class Post extends BasePost {
 
-	@Transient
-    private Long inReplyTo;
-
     @OneToMany(mappedBy = "parentPost", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<BasePost> replies = new ArrayList<>();
     

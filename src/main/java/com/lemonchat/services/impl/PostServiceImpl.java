@@ -44,6 +44,12 @@ public class PostServiceImpl implements PostService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found with id " + postId));
 		return postMapper.postToPostDto(existingPost);
 	}
+	
+	@Override
+	public PostDto findPostByBasePost(BasePostDto basePostDto) {
+		return postMapper.postToPostDto(postRepository.findById(basePostDto.getPostId()).get());
+	}
+	
 
 	@Override
 	@Transactional

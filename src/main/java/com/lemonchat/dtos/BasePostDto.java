@@ -15,6 +15,8 @@ import lombok.ToString;
 public class BasePostDto {
     private Long postId;
     
+    private Long inReplyTo;
+    
     private Boolean hasReplies;
     
     @NotNull
@@ -31,5 +33,17 @@ public class BasePostDto {
     
     @JsonIgnore
     private BasePostDto parentPost;
+    
+    public BasePostDto(PostDto postDto) {
+    	this.setAccount(postDto.getAccount());
+    	this.setContent(postDto.getContent());
+    	this.setHasReplies(postDto.getHasReplies());
+    	this.setInReplyTo(postDto.getInReplyTo());
+    	this.setParentPost(postDto.getParentPost());
+    	this.setPostId(postDto.getPostId());
+    	this.setTitle(postDto.getTitle());
+    	this.setTopic(postDto.getTopic());
+    	this.setUsername(postDto.getUsername());
+    }
     
 }

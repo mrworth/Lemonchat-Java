@@ -1,5 +1,8 @@
 package com.lemonchat.controllers;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lemonchat.dtos.BasePostDto;
@@ -41,10 +45,56 @@ public class PostController {
         return postService.findPostById(postId);
     }
     
+    @GetMapping("/map/{postId}")
+    public Set<BasePostDto> getPostMapById(@PathVariable("postId") Long postId, @RequestParam(name = "depth", required = false) Integer depth) {
+//    	HashMap<Long, PostDto> postMap = new HashMap<Long, PostDto>();
+    	PostDto parentPostDto = postService.findPostById(postId);
+    	Set<PostDto> posts = new HashSet<PostDto>();
+    	posts.add(parentPostDto);
+    	getReplyPostsNesting(posts, new HashSet<Long>(), depth, 1);
+        return postSetToBasePostSet(posts);
+    }
+    
+    private Set<BasePostDto> postSetToBasePostSet(Set<PostDto> postDtos){
+    	Set<BasePostDto> basePostDtos = new HashSet<BasePostDto>();
+    	for(PostDto postDto : postDtos) {
+    		basePostDtos.add(new BasePostDto(postDto));
+    	}
+    	return basePostDtos;
+    }
+    
+    private boolean getReplyPostsNesting(Set<PostDto> allPosts, Set<Long> processedPostIds, int maxDepth, int currentDepth){
+    	//if any post is processed
+    	boolean allPostsProcessed = true;
+    	Set<PostDto> newPosts = new HashSet<PostDto>();
+    	for(PostDto postDto : allPosts) {
+    		if(processedPostIds.contains(postDto.getPostId())) {
+    			continue;
+    		}
+    		if(postDto.getHasReplies()) {
+    			Long postId = postDto.getPostId();
+    			allPostsProcessed = false;
+    			processedPostIds.add(postId);
+    			for(BasePostDto basePostDto : postDto.getReplies()) {
+    				if(basePostDto.getHasReplies()) {
+    					newPosts.add(postService.findPostByBasePost(basePostDto));
+    					continue;
+    				}
+    				newPosts.add(new PostDto(basePostDto, postId));
+    			}
+    		}
+    	}
+    	allPosts.addAll(newPosts);
+    	if(allPostsProcessed || currentDepth >= maxDepth) {    		
+    		return allPostsProcessed;
+    	}
+    	return getReplyPostsNesting(allPosts,processedPostIds, maxDepth, currentDepth+1); 
+    }
+    
     @PostMapping
     public ResponseEntity<PostDto> createPost(@RequestBody @Valid PostDto requestDto) {
     	PostDto createdPost = postService.createPost(requestDto);
-        return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
+        return new ResponseEntity<>(createdPost, HttpStatus.I_AM_A_TEAPOT);
     }
 
     @PutMapping
