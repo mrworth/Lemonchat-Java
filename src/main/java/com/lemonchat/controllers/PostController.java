@@ -86,7 +86,7 @@ public class PostController {
     	}
     	allPosts.addAll(newPosts);
     	if(allPostsProcessed || currentDepth >= maxDepth) {    		
-    		return allPostsProcessed;
+    		return true;
     	}
     	return getReplyPostsNesting(allPosts,processedPostIds, maxDepth, currentDepth+1); 
     }
