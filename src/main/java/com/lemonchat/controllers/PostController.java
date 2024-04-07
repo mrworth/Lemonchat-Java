@@ -94,7 +94,7 @@ public class PostController {
     @PostMapping
     public ResponseEntity<PostDto> createPost(@RequestBody @Valid PostDto requestDto) {
     	PostDto createdPost = postService.createPost(requestDto);
-        return new ResponseEntity<>(createdPost, HttpStatus.I_AM_A_TEAPOT);
+        return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }
 
     @PutMapping
