@@ -1,5 +1,9 @@
 package com.lemonchat.services.impl;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,14 +64,17 @@ public class PostServiceImpl implements PostService {
 		String username = postDto.getUsername();
 		Account account = accountRepository.findByUsername(username).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found with username " + username));
 		post.setAccount(account);
-		BasePost parentBasePost = null;
 		//inReplyTo is valid as null (this is a topic)
-		if(inReplyTo!=null) {
-			parentBasePost = basePostRepository.findById(inReplyTo)
-					.orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "Parent post not found with id " + inReplyTo));
-			post.setParentPost(parentBasePost);
-			post.setTopic(parentBasePost.getTopic());
+		if(inReplyTo == null) {
+			if(postRepository.existsByTopic(postDto.getTopic())) {
+				throw new ResponseStatusException(HttpStatus.CONFLICT, "Topic already exists for " + postDto.getTopic());
+			}
+			return postMapper.postToPostDto(postRepository.save(post));
 		}
+		BasePost parentBasePost = basePostRepository.findById(inReplyTo)
+				.orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "Parent post not found with id " + inReplyTo));
+		post.setParentPost(parentBasePost);
+		post.setTopic(parentBasePost.getTopic());
 		PostDto returnPost = postMapper.postToPostDto(postRepository.save(post));
 		if(parentBasePost!=null && !parentBasePost.getHasReplies()) {
 			Post parentPost = postRepository.findById(inReplyTo).get();
@@ -106,6 +113,14 @@ public class PostServiceImpl implements PostService {
 		Post existingPost =  postRepository.findById(postId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found with id " + postId));
 		return postMapper.postToPostDto(existingPost);
+	}
+
+	@Override
+	public Set<PostDto> getTopicsNotInList(List<Long> topicIds) {
+		Set<Post> posts = postRepository.findByParentPostIsNullAndPostIdNotIn(topicIds);
+		return posts.stream()
+                .map(postMapper::postToPostDto)
+                .collect(Collectors.toSet());
 	}
 
 }

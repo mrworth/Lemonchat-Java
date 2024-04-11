@@ -1,5 +1,8 @@
 package com.lemonchat.services;
 
+import java.util.List;
+import java.util.Set;
+
 import com.lemonchat.dtos.BasePostDto;
 import com.lemonchat.dtos.PostDto;
 
@@ -13,4 +16,6 @@ public interface PostService {
 	PostDto updatePost(PostDto postDto);
 	void deletePost(Long postId);
 	PostDto findPostById(Long postId);
+
+	Set<PostDto> getTopicsNotInList(List<Long> topicIds);
 }

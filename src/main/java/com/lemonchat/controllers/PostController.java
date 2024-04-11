@@ -1,7 +1,10 @@
 package com.lemonchat.controllers;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lemonchat.dtos.BasePostDto;
 import com.lemonchat.dtos.PostDto;
+import com.lemonchat.entities.Post;
 import com.lemonchat.services.PostService;
 import com.lemonchat.services.impl.PostServiceImpl;
 
@@ -47,12 +51,22 @@ public class PostController {
     
     @GetMapping("/map/{postId}")
     public Set<BasePostDto> getPostMapById(@PathVariable("postId") Long postId, @RequestParam(name = "depth", required = false) Integer depth) {
-//    	HashMap<Long, PostDto> postMap = new HashMap<Long, PostDto>();
     	PostDto parentPostDto = postService.findPostById(postId);
     	Set<PostDto> posts = new HashSet<PostDto>();
     	posts.add(parentPostDto);
     	getReplyPostsNesting(posts, new HashSet<Long>(), depth, 1);
         return postSetToBasePostSet(posts);
+    }
+    
+    @GetMapping("/topics")
+    public Set<BasePostDto> getTopics(@RequestParam("topic_ids") String topicIdsString) {
+    	List<Long> topicIds = Arrays.stream(topicIdsString.split(","))
+                .map(String::trim) 
+                .map(Long::valueOf) 
+                .collect(Collectors.toList());
+    	Set<PostDto> topicPosts = postService.getTopicsNotInList(topicIds);
+    	getReplyPostsNesting(topicPosts, new HashSet<Long>(), 3, 1);
+    	return postSetToBasePostSet(topicPosts);
     }
     
     private Set<BasePostDto> postSetToBasePostSet(Set<PostDto> postDtos){
@@ -64,7 +78,7 @@ public class PostController {
     }
     
     private boolean getReplyPostsNesting(Set<PostDto> allPosts, Set<Long> processedPostIds, int maxDepth, int currentDepth){
-    	//if any post is processed
+    	//if any post is processed, set to false and call this function again
     	boolean allPostsProcessed = true;
     	Set<PostDto> newPosts = new HashSet<PostDto>();
     	for(PostDto postDto : allPosts) {
