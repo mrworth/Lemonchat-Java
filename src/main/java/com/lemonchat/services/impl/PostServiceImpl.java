@@ -66,9 +66,11 @@ public class PostServiceImpl implements PostService {
 		post.setAccount(account);
 		//inReplyTo is valid as null (this is a topic)
 		if(inReplyTo == null) {
+			//should consider lookup table for topics (uniqueness constraint for new topics not strongly enforced on db side - concurrency issue: low concern for POC)
 			if(postRepository.existsByTopic(postDto.getTopic())) {
 				throw new ResponseStatusException(HttpStatus.CONFLICT, "Topic already exists for " + postDto.getTopic());
 			}
+			post.setTitle(post.getTopic());
 			return postMapper.postToPostDto(postRepository.save(post));
 		}
 		BasePost parentBasePost = basePostRepository.findById(inReplyTo)
@@ -117,6 +119,9 @@ public class PostServiceImpl implements PostService {
 
 	@Override
 	public Set<PostDto> getTopicsNotInList(List<Long> topicIds) {
+		if(topicIds.size()==0) {
+			topicIds.add(-1L);
+		}
 		Set<Post> posts = postRepository.findByParentPostIsNullAndPostIdNotIn(topicIds);
 		return posts.stream()
                 .map(postMapper::postToPostDto)

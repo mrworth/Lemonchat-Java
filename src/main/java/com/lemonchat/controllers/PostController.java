@@ -1,5 +1,6 @@
 package com.lemonchat.controllers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lemonchat.dtos.BasePostDto;
 import com.lemonchat.dtos.PostDto;
-import com.lemonchat.entities.Post;
 import com.lemonchat.services.PostService;
 import com.lemonchat.services.impl.PostServiceImpl;
 
@@ -50,31 +50,36 @@ public class PostController {
     }
     
     @GetMapping("/map/{postId}")
-    public Set<BasePostDto> getPostMapById(@PathVariable("postId") Long postId, @RequestParam(name = "depth", required = false) Integer depth) {
+    public List<BasePostDto> getPostMapById(@PathVariable("postId") Long postId, @RequestParam(name = "depth", required = false) Integer depth) {
     	PostDto parentPostDto = postService.findPostById(postId);
     	Set<PostDto> posts = new HashSet<PostDto>();
     	posts.add(parentPostDto);
     	getReplyPostsNesting(posts, new HashSet<Long>(), depth, 1);
-        return postSetToBasePostSet(posts);
+        return postSetToBasePostList(posts);
     }
     
     @GetMapping("/topics")
-    public Set<BasePostDto> getTopics(@RequestParam("topic_ids") String topicIdsString) {
-    	List<Long> topicIds = Arrays.stream(topicIdsString.split(","))
-                .map(String::trim) 
-                .map(Long::valueOf) 
-                .collect(Collectors.toList());
+    public List<BasePostDto> getTopics(@RequestParam(name="topic_ids",  required=false) String topicIdsString) {
+    	List<Long> topicIds = new ArrayList<Long>();
+    	if(topicIdsString!=null && !topicIdsString.equals("")) {	
+    		topicIds = Arrays.stream(topicIdsString.split(","))
+    				.map(String::trim) 
+    				.map(Long::valueOf) 
+    				.collect(Collectors.toList());
+    	}
     	Set<PostDto> topicPosts = postService.getTopicsNotInList(topicIds);
     	getReplyPostsNesting(topicPosts, new HashSet<Long>(), 3, 1);
-    	return postSetToBasePostSet(topicPosts);
+    	return postSetToBasePostList(topicPosts);
     }
     
-    private Set<BasePostDto> postSetToBasePostSet(Set<PostDto> postDtos){
+    private List<BasePostDto> postSetToBasePostList(Set<PostDto> postDtos){
     	Set<BasePostDto> basePostDtos = new HashSet<BasePostDto>();
     	for(PostDto postDto : postDtos) {
     		basePostDtos.add(new BasePostDto(postDto));
     	}
-    	return basePostDtos;
+    	return basePostDtos.stream()
+                .sorted()
+                .collect(Collectors.toList());
     }
     
     private boolean getReplyPostsNesting(Set<PostDto> allPosts, Set<Long> processedPostIds, int maxDepth, int currentDepth){

@@ -12,7 +12,7 @@ import lombok.ToString;
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @ToString
-public class BasePostDto {
+public class BasePostDto implements Comparable<BasePostDto>{
     private Long postId;
     
     private Long inReplyTo;
@@ -45,5 +45,10 @@ public class BasePostDto {
     	this.setTopic(postDto.getTopic());
     	this.setUsername(postDto.getUsername());
     }
+
+	@Override
+	public int compareTo(BasePostDto other) {
+		return Long.compare(this.postId, other.getPostId());
+	}
     
 }
