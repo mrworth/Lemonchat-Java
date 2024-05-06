@@ -34,7 +34,7 @@ public class Seeder implements CommandLineRunner{
 			PostDto loopPostDto = new PostDto();
 			loopPostDto.setPostDetails(null,"Test Title Looped", "Test Topic Looped "+ i, "Test Content Looped", "testusername");
 			loopPostDto = postService.createPost(loopPostDto);
-			PostDto loopReply = createReply(loopPostDto, "Test Title Reply Looped", "Test Content Reply Looped", "testusername");
+			createReply(loopPostDto, "Test Title Reply Looped", "Test Content Reply Looped", "testusername");
 		}
 	}
 	

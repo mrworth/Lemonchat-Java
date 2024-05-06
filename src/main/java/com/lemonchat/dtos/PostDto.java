@@ -1,6 +1,5 @@
 package com.lemonchat.dtos;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
